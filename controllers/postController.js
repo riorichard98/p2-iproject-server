@@ -8,9 +8,10 @@ class PostController {
             const UserId = req.auth.id
             const { description } = req.body
             const imageUrl = 'data:image/gif;base64,'+req.file.buffer.toString('base64')
-            await Post.create({imageUrl,description,UserId})
+            const post = await Post.create({imageUrl,description,UserId})
             res.status(201).json({
-                message: 'Success create new post'
+                message: 'Success create new post',
+                post
             })
         } catch (error) {
             console.log(error);

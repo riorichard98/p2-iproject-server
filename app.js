@@ -36,6 +36,7 @@ io.on("connection", (socket) => {
 
     //joining on my own room
     socket.on('joinMyOwnRoom',(MyId)=>{
+        console.log(`${socket.id} enter room ${MyId}`);
         socket.join(MyId)
     })
 
