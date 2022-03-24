@@ -34,7 +34,22 @@ io.on("connection", (socket) => {
         console.log('user disconnected');
     })
 
+    //joining on my own room
+    socket.on('joinMyOwnRoom',(MyId)=>{
+        socket.join(MyId)
+    })
 
+    //joining on my friends room
+    socket.on('joinMyFriendsRoom',(friendsIds)=>{
+        const rooms = friendsIds
+        socket.join(rooms)
+    })
+
+    //broadcast posts in my own room
+    socket.on('broadcastPost',(post,myId)=>{
+        io.to(myId).emit('updatePosts',post)
+    })
+    
     socket.on('gettingAllMessage', async (senderId, receiverId, senderName) => {
         try {
             const RoomId1 = senderId + '&' + receiverId
@@ -43,20 +58,15 @@ io.on("connection", (socket) => {
             const chats2 = await ChatController.readAllChat(RoomId2)
             if (chats1.length) {
                 socket.join(RoomId1)
-                io.to(RoomId1).emit('receiveChat', chats1,RoomId1)
+                io.to(RoomId1).emit('receiveChats', chats1,RoomId1)
             } else if (chats2.length) {
                 socket.join(RoomId2)
-                io.to(RoomId2).emit('receiveChat', chats2,RoomId2)
+                io.to(RoomId2).emit('receiveChats', chats2,RoomId2)
             }else{
                 socket.join(RoomId1)
                 await ChatController.createChat(RoomId1, senderName,null)
-                io.to(RoomId1).emit('receiveChat', [],{RoomId:RoomId1})
+                io.to(RoomId1).emit('receiveChats', [],{RoomId:RoomId1})
             }
-            //  else {
-            //     await ChatController.createChat(RoomId1, senderName)
-            //     const chats = await ChatController.readAllChat(RoomId1)
-            //     io.to(RoomId1).emit('receiveChat', chats)
-            // }
         } catch (error) {
 
         }
@@ -65,8 +75,7 @@ io.on("connection", (socket) => {
     socket.on('sendMessage', async (RoomId, sender,chat) => {
         try {
             await ChatController.createChat(RoomId, sender,chat)
-            const chats = await ChatController.readAllChat(RoomId)
-            io.to(RoomId).emit('receiveChat', chats)
+            io.to(RoomId).emit('updateChat', chat)
         } catch (error) {
             
         }
