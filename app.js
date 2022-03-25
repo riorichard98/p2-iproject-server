@@ -11,7 +11,7 @@ const { createServer } = require("http");
 const { Server } = require("socket.io");
 const { ChatController } = require('./controllers/chatController.js')
 const httpServer = createServer(app);
-
+const {FriendRequest} = require('./models/index.js')
 
 const io = new Server(httpServer, {
     cors: {
@@ -77,6 +77,15 @@ io.on("connection", (socket) => {
         try {
             await ChatController.createChat(RoomId, sender,chat)
             io.to(RoomId).emit('updateChat', chat)
+        } catch (error) {
+            
+        }
+    })
+
+    socket.on('sendFriendRequest',async(fromName,fromId,toId)=>{
+        try {
+            const friendRequest = await FriendRequest.create({fromName,fromId,toId})
+            io.to(toId).emit('pendingRequest',friendRequest)
         } catch (error) {
             
         }
